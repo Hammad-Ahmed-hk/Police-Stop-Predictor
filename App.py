@@ -5,6 +5,7 @@ from io import BytesIO
 import base64
 from datetime import datetime
 import os
+import hmac
 
 # -------------------------
 # Configuration / constants
@@ -13,10 +14,35 @@ PAGE_TITLE = "Police Stop Outcome Predictor"
 PAGE_ICON = "🚨"
 MODEL_PATH = "police_arrest_model.pkl"
 
-CREDENTIALS = {
+# Real logins come from Streamlit secrets (.streamlit/secrets.toml):
+#   [credentials]
+#   alice = "a-strong-password"
+# If no secrets are configured the app runs in DEMO MODE with the public
+# accounts below. They protect nothing, so never reuse them anywhere real.
+DEMO_CREDENTIALS = {
     "admin": "password123",
     "user": "userpass"
 }
+
+
+def load_credentials():
+    """Return (credentials, is_demo_mode)."""
+    try:
+        configured = dict(st.secrets["credentials"])
+        if configured:
+            return configured, False
+    except Exception:
+        pass
+    return DEMO_CREDENTIALS, True
+
+
+CREDENTIALS, DEMO_MODE = load_credentials()
+
+
+def check_login(username, password):
+    """Constant-time password comparison."""
+    expected = CREDENTIALS.get(username)
+    return expected is not None and hmac.compare_digest(str(expected).encode(), str(password).encode())
 
 # -------------------------
 # Global CSS — Navy Blue Premium Theme
@@ -461,17 +487,18 @@ if not st.session_state.authenticated:
         password = st.text_input("🔑  Password", type="password", placeholder="Enter password")
         login_pressed = st.button("Sign In  →", use_container_width=True, type="primary")
 
-        st.markdown("""
-        <div style="text-align:center; margin-top:1rem;">
-            <span style="color: #4d6a8a; font-size:0.8rem;">
-                Demo — use <code style="color:#4f8ef7">admin</code> / <code style="color:#4f8ef7">password123</code>
-            </span>
-        </div>
-        """, unsafe_allow_html=True)
+        if DEMO_MODE:
+            st.markdown("""
+            <div style="text-align:center; margin-top:1rem;">
+                <span style="color: #4d6a8a; font-size:0.8rem;">
+                    Demo mode — use <code style="color:#4f8ef7">admin</code> / <code style="color:#4f8ef7">password123</code>
+                </span>
+            </div>
+            """, unsafe_allow_html=True)
         st.markdown('</div>', unsafe_allow_html=True)
 
     if login_pressed:
-        if username in CREDENTIALS and CREDENTIALS[username] == password:
+        if check_login(username, password):
             st.session_state.authenticated = True
             st.session_state.username = username
             st.rerun()

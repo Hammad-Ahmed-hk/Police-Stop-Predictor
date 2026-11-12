@@ -15,7 +15,7 @@ A machine learning web application that predicts the outcome of police traffic s
 ```
 Police Data.csv
       ↓
-Data Cleaning & EDA (Police_File.ipynb)
+Data Cleaning & EDA (Police File.ipynb)
       ↓
 Logistic Regression Model Training
       ↓
@@ -34,7 +34,7 @@ User inputs stop details → Prediction + Probability
 police-stop-predictor/
 │
 ├── App.py                      # Streamlit web application
-├── Police_File.ipynb           # Data analysis, EDA & model training notebook
+├── Police File.ipynb           # Data analysis, EDA & model training notebook
 ├── police_arrest_model.pkl     # Trained Logistic Regression model
 ├── columns.pkl                 # Saved feature column names
 ├── Police Data.csv             # Raw dataset
@@ -45,7 +45,7 @@ police-stop-predictor/
 
 ## ⚙️ Features
 
-- 🔐 **Secure Login** — Session-based authentication with username/password
+- 🔐 **Login gate** — Session-based login. Logins come from Streamlit secrets; without them the app runs in a clearly labelled demo mode
 - 📊 **EDA & Visualizations** — Gender, race, age distributions + correlation heatmap
 - 🤖 **ML Model** — Logistic Regression trained on real police stop data
 - 📈 **Probability Scores** — Shows arrest vs no-arrest confidence scores
@@ -79,6 +79,16 @@ police-stop-predictor/
 
 ---
 
+## ⚠️ Responsible use and limitations
+
+This is a learning project, not a decision tool.
+
+- The model uses **driver race and gender** as inputs. Using protected attributes to predict arrests can reproduce and amplify bias in the historical data. Do not use it to make or support real decisions about people.
+- It is a simple logistic regression on five features, so predictions are rough estimates.
+- A good next step is to drop the demographic inputs and compare performance and fairness metrics with and without them.
+
+---
+
 ## 🚀 Getting Started
 
 ### 1. Clone the Repository
@@ -96,11 +106,11 @@ source venv/bin/activate     # Mac/Linux
 
 ### 3. Install Dependencies
 ```bash
-pip install streamlit pandas numpy scikit-learn matplotlib seaborn
+pip install -r requirements.txt
 ```
 
 ### 4. Run the Notebook (to train model)
-Open `Police_File.ipynb` in Jupyter and run all cells. This will generate:
+Open `Police File.ipynb` in Jupyter and run all cells. This will generate:
 - `police_arrest_model.pkl`
 - `columns.pkl`
 
@@ -109,9 +119,20 @@ Open `Police_File.ipynb` in Jupyter and run all cells. This will generate:
 streamlit run App.py
 ```
 
-### 6. Login Credentials (Demo)
-| Username | Password |
-|---|---|
+### 6. Logging in
+
+**Demo mode (default).** With no secrets configured the app shows a "Demo mode" hint and accepts `admin` / `password123` or `user` / `userpass`. These are public and protect nothing.
+
+**Your own logins.** Create `.streamlit/secrets.toml` (it is git-ignored) and the demo accounts are switched off:
+
+```toml
+[credentials]
+alice = "a-strong-password"
+```
+
+On Streamlit Community Cloud, paste the same text into **App settings → Secrets**.
+
+---|---|
 | `admin` | `password123` |
 | `user` | `userpass` |
 
@@ -119,16 +140,7 @@ streamlit run App.py
 
 ## 📦 Requirements
 
-```
-python >= 3.11
-streamlit
-pandas
-numpy
-scikit-learn
-matplotlib
-seaborn
-pickle (built-in)
-```
+See [`requirements.txt`](requirements.txt). Python 3.11 or newer is recommended.
 
 ---
 
